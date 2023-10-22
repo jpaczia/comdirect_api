@@ -1,6 +1,7 @@
 import typing
 from pydantic import Field
 import requests
+import json
 
 from src.handler.AbstractHandler import AbstractHandler
 from src.data.config_types import Credentials
@@ -14,11 +15,13 @@ class AuthenticationHandler(AbstractHandler):
     refresh_token: typing.Optional[str] = Field(default=None)
     credentials: Credentials = Field(default_factory=Credentials.get_credentials)
     session_identifier: typing.Optional[str] = Field(default=None)
+    challenge_id: typing.Optional[str] = Field(default=None)
 
     def authenticate(self) -> None:
         """Authenticate against the comdirect API"""
         self.retrieve_oauth2_token()
         self.retrieve_session_object()
+        self.request_tan()
 
     def retrieve_oauth2_token(self) -> None:
         """Retrieve an OAuth2 authentication token,
@@ -68,6 +71,42 @@ class AuthenticationHandler(AbstractHandler):
 
         response_json = response.json()[0]
         self.session_identifier = response_json["identifier"]
+
+    def request_tan(self) -> None:
+        """Request a TAN challenge for the session object from the previous step.
+        Third step in the authentication process.
+        Raises:
+            AuthenticationException: Raised if the authentication fails.
+        """
+
+        tan_url = f"{self.api_config.api_url}/session/clients/user/v1/sessions/{self.session_identifier}/validate"
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {self.access_token}",
+            "x-http-request-info": str(
+                {
+                    "clientRequestId": {
+                        "sessionId": self.session_id,
+                        "requestId": AbstractHandler.generate_request_id(),
+                    }
+                }
+            ),
+            "Content-Type": "application/json",
+        }
+        payload = json.dumps(
+            {
+                "identifier": f"{self.session_identifier}",
+                "sessionTanActive": True,
+                "activated2FA": True,
+            }
+        )
+
+        response = requests.post(url=tan_url, headers=headers, data=payload)
+        if response.status_code != 201:
+            raise AuthenticationException(response.headers["x-http-response-info"])
+
+        response_json = json.loads(response.headers["x-once-authentication-info"])
+        self.challenge_id = response_json["id"]
 
     def set_tokens(self, response_json: typing.Dict[str, typing.Any]) -> None:
         """Set the retrieved access and refresh token"""
