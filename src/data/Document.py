@@ -4,6 +4,7 @@ import typing
 
 from src.data.DocumentMetaData import DocumentMetaData
 from src import file_utils
+from src.data.config_types import DocumentClassificationConfig
 
 
 class Document(BaseModel):
@@ -65,3 +66,20 @@ class Document(BaseModel):
         """Get document extension from mime type"""
         ext = self.mime_type.split("/")[1]
         return ext
+
+    def classify(
+        self, document_classification_config: DocumentClassificationConfig
+    ) -> typing.Tuple[str, str]:
+        matched_wkn: str = document_classification_config.unknown_classification
+        for wkn in document_classification_config.known_depot_positions:
+            if wkn in self.name:
+                matched_wkn = wkn
+                break
+
+        matched_file_class: str = document_classification_config.unknown_classification
+        for known_file_class in document_classification_config.known_file_classes:
+            if known_file_class in self.name:
+                matched_file_class = known_file_class
+                break
+
+        return matched_wkn, matched_file_class

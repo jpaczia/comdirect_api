@@ -3,5 +3,23 @@
 	"oauth_url": "https://api.comdirect.de",
 	"credentials_path": "TODO",
 	"output_dir": "TODO",
-	"time_format": "%Y-%m-%d %H:%M:%S"
+	"time_format": "%Y-%m-%d %H:%M:%S",
+	"file_classes": {
+		"known": [
+			"Kauf",
+			"Verkauf",
+			"Steuermitteilung",
+			"Ertragsgutschrift",
+			"Kosteninformation",
+			"Jahressteuerbescheinigung",
+			"Saldenbestätigung",
+			"Depotvollmacht",
+			"Buchungsanzeige"
+		],
+		"unknown": "Sonstiges",
+		"ignored": [
+			"Finanzreport"
+		]
+	},
+	"depot_positions": []
 }

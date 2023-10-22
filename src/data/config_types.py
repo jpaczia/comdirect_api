@@ -66,3 +66,30 @@ class Credentials(BaseModel):
             ),
             password=getpass(),
         )
+
+
+class DocumentClassificationConfig(BaseModel):
+    """Config for classifying documents"""
+
+    known_file_classes: typing.Set[str]
+    ignored_file_classes: typing.Set[str]
+    unknown_classification: str
+    known_depot_positions: typing.Set[str]
+
+    class Config:
+        allow_mutation = False
+
+    @classmethod
+    def from_config(
+        cls, config_path: typing.Optional[str] = None
+    ) -> "DocumentClassificationConfig":
+        """Load document classification config from json file"""
+        config_json = file_utils.load_config(config_path)
+        file_classes = config_json["file_classes"]
+
+        return DocumentClassificationConfig(
+            known_file_classes=set(file_classes["known"]),
+            ignored_file_classes=set(file_classes["ignored"]),
+            unknown_classification=file_classes["unknown"],
+            known_depot_positions=set(config_json["depot_positions"]),
+        )
