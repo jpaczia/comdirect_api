@@ -32,7 +32,6 @@ class ComdirectAPI(BaseModel):
         ):
             return
 
-        doc_name = document.get_document_file_name()
         (
             matched_wkn,
             matched_file_class,
@@ -42,7 +41,7 @@ class ComdirectAPI(BaseModel):
                 self.output_dir,
                 matched_wkn,
                 matched_file_class,
-                doc_name,
+                document.get_document_file_name(),
             )
         )
 
