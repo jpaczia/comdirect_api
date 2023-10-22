@@ -23,7 +23,9 @@ class ComdirectAPI(BaseModel):
     def process_document(self, document: Document) -> None:
         """Download document from the postbox if it's new and no ad.
         Skip documents which have been downloaded already."""
-        if document.advertisement:
+        if document.skip_download(
+            self.document_classification_config.ignored_file_classes
+        ):
             return
 
         doc_name = document.get_document_file_name()

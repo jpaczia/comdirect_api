@@ -83,3 +83,13 @@ class Document(BaseModel):
                 break
 
         return matched_wkn, matched_file_class
+
+    def skip_download(self, ignored_file_classes: typing.Set[str]) -> bool:
+        """Checks if document download should be skipped
+        (i.e. docment is an ad or belongs to an ignored file class)."""
+        return self.advertisement or any(
+            [
+                ignored_file_class in self.name
+                for ignored_file_class in ignored_file_classes
+            ]
+        )
