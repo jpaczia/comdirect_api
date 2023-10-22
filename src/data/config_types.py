@@ -2,8 +2,16 @@ from pydantic import BaseModel, HttpUrl
 import json
 from getpass import getpass
 import typing
+from collections import Counter
 
 from src import file_utils
+
+
+def ensure_no_duplicates(elements: typing.List[str]) -> None:
+    duplicates: typing.List[str] = [k for k, v in Counter(elements).items() if v > 1]
+
+    if len(duplicates) > 0:
+        raise ValueError(f"Duplicates in config: {', '.join(duplicates)}")
 
 
 class ApiConfig(BaseModel):
@@ -86,6 +94,22 @@ class DocumentClassificationConfig(BaseModel):
         """Load document classification config from json file"""
         config_json = file_utils.load_config(config_path)
         file_classes = config_json["file_classes"]
+
+        # ensure there are no duplicates in the config to keep it short
+        ensure_no_duplicates(file_classes["known"])
+        ensure_no_duplicates(file_classes["ignored"])
+        ensure_no_duplicates(config_json["depot_positions"])
+
+        # ensure there's no overlap between the file classes
+        # "known" and "ignored" in the config
+        file_class_overlap: typing.Set[str] = set.intersection(
+            set(file_classes["known"]), set(file_classes["ignored"])
+        )
+        if len(file_class_overlap) > 0:
+            raise ValueError(
+                "Overlap between the file classes 'known' and 'ignored' in the config file'."
+                f"The following elements are in both lists: {', '.join(list(file_class_overlap))}"
+            )
 
         return DocumentClassificationConfig(
             known_file_classes=set(file_classes["known"]),
