@@ -21,12 +21,15 @@ class AuthenticationHandler(AbstractHandler):
     expiration_datetime: typing.Optional[datetime.datetime] = Field(default=None)
 
     def get_access_token(self) -> str:
+        """Get the access token required to access the protected API endpoints.
+        If required performa the authentication first in order to retrieve the access token."""
         if not self.is_authenticated():
             self.authenticate()
 
         return self.access_token
 
     def is_authenticated(self) -> bool:
+        """Check if the authentication is valid"""
         valid_token = (
             self.expiration_datetime is not None
             and self.expiration_datetime > datetime.datetime.now()

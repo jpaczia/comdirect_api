@@ -4,6 +4,7 @@ import json
 
 
 def get_project_dir() -> str:
+    """Get project directory, i.e. the root directory of the project"""
     project_dir: str = os.path.dirname(os.path.dirname(__file__))
     while "src" in project_dir:
         project_dir = os.path.dirname(project_dir)
@@ -12,6 +13,8 @@ def get_project_dir() -> str:
 
 
 def load_config(config_path: typing.Optional[str] = None):
+    """Load the config from the given path.
+    If no path is given, load the config from the default path in the project directory."""
     if config_path is None:
         config_path = os.path.join(get_project_dir(), "config.json")
     with open(config_path, "r", encoding="UTF-8") as config_file:
@@ -81,4 +84,5 @@ def save_pdf(content: bytes, pdf_path: str) -> None:
 
 
 def get_time_format() -> str:
+    """Time format for logging outputs"""
     return load_config()["time_format"]

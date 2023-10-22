@@ -58,6 +58,7 @@ class Document(BaseModel):
         )
 
     def get_document_file_name(self) -> str:
+        """Get the document file name and replace invalid chars in it"""
         return file_utils.replace_invalid_chars(
             f"{self.name}.{self.get_file_extension()}"
         )
@@ -70,6 +71,9 @@ class Document(BaseModel):
     def classify(
         self, document_classification_config: DocumentClassificationConfig
     ) -> typing.Tuple[str, str]:
+        """Classify the file class and determine to which stock this document
+        belongs to by matching the WKN."""
+
         matched_wkn: str = document_classification_config.unknown_classification
         for wkn in document_classification_config.known_depot_positions:
             if wkn in self.name:
