@@ -3,6 +3,7 @@ from pydantic import Field
 import requests
 import json
 import datetime
+import logging
 
 from src.handler.AbstractHandler import AbstractHandler
 from src.data.config_types import Credentials
@@ -50,6 +51,8 @@ class AuthenticationHandler(AbstractHandler):
         self.activate_session_tan()
         self.oauth2_cd_secondary_flow()
 
+        logging.info("Authentication process finished")
+
     def retrieve_oauth2_token(self) -> None:
         """Retrieve an OAuth2 authentication token,
         which is used to request the creation of the session TAN from the comdirect API.
@@ -69,6 +72,7 @@ class AuthenticationHandler(AbstractHandler):
             raise AuthenticationException(response.headers["x-http-response-info"])
 
         self.set_tokens(response_json=response.json())
+        logging.info("Retrieved oauth2 token")
 
     def retrieve_session_object(self):
         """Retrieve the session object which is required to request the session TAN later on.
@@ -98,6 +102,7 @@ class AuthenticationHandler(AbstractHandler):
 
         response_json = response.json()[0]
         self.session_identifier = response_json["identifier"]
+        logging.info("Retrieved session object")
 
     def request_tan(self) -> None:
         """Request a TAN challenge for the session object from the previous step.
@@ -134,6 +139,7 @@ class AuthenticationHandler(AbstractHandler):
 
         response_json = json.loads(response.headers["x-once-authentication-info"])
         self.challenge_id = response_json["id"]
+        logging.info("Requested tan challenge")
 
     def activate_session_tan(self) -> None:
         """Activate the previously retrieved session TAN.
@@ -168,6 +174,8 @@ class AuthenticationHandler(AbstractHandler):
         if response.status_code != 200:
             raise AuthenticationException(response.headers["x-http-response-info"])
 
+        logging.info("Activated TAN session")
+
     def oauth2_cd_secondary_flow(self) -> None:
         """comdirect specific OAuth2 authentication flow "cd_secondary".
         This authentication flow is a mix of the "client-credentials"-flow
@@ -196,6 +204,10 @@ class AuthenticationHandler(AbstractHandler):
             raise AuthenticationException(response.headers["x-http-response-info"])
 
         self.set_tokens(response_json=response.json())
+
+        logging.info(
+            "Performed the comdirect specific OAuth2 authentication flow 'cd_secondary'"
+        )
 
     def set_tokens(self, response_json: typing.Dict[str, typing.Any]) -> None:
         """Set the retrieved access and refresh token"""
