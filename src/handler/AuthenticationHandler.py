@@ -34,6 +34,7 @@ class AuthenticationHandler(AbstractHandler):
         )
 
         self.activate_session_tan()
+        self.oauth2_cd_secondary_flow()
 
     def retrieve_oauth2_token(self) -> None:
         """Retrieve an OAuth2 authentication token,
@@ -152,6 +153,35 @@ class AuthenticationHandler(AbstractHandler):
         response = requests.patch(url=activation_url, headers=headers, data=payload)
         if response.status_code != 200:
             raise AuthenticationException(response.headers["x-http-response-info"])
+
+    def oauth2_cd_secondary_flow(self) -> None:
+        """comdirect specific OAuth2 authentication flow "cd_secondary".
+        This authentication flow is a mix of the "client-credentials"-flow
+        and the "resource-owner-password-credentials"-flow.
+        This allows to issue an access-token which entitles
+        to use the banking- and brokerage-interfaces of the comdirect API.
+        Fifth (last) step in the authentication process.
+        Raises:
+            AuthenticationException: Raised if the authentication fails.
+        """
+
+        url = f"{self.api_config.oauth_url}/oauth/token"
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json",
+        }
+        payload = {
+            "client_id": self.credentials.client_id,
+            "client_secret": self.credentials.client_secret,
+            "grant_type": "cd_secondary",
+            "token": self.access_token,
+        }
+
+        response = requests.post(url=url, headers=headers, data=payload)
+        if response.status_code != 200:
+            raise AuthenticationException(response.headers["x-http-response-info"])
+
+        self.set_tokens(response_json=response.json())
 
     def set_tokens(self, response_json: typing.Dict[str, typing.Any]) -> None:
         """Set the retrieved access and refresh token"""
