@@ -1,7 +1,7 @@
 import logging
 
 from src import file_utils
-from src.comdirect_api import ComdirectAPI
+from src.ComdirectAPI import ComdirectAPI
 
 
 def main() -> None:
