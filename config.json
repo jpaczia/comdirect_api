@@ -2,5 +2,6 @@
 	"api_url": "https://api.comdirect.de/api",
 	"oauth_url": "https://api.comdirect.de",
 	"credentials_path": "TODO",
+	"output_dir": "TODO",
 	"time_format": "%Y-%m-%d %H:%M:%S"
 }

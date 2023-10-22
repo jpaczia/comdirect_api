@@ -3,6 +3,7 @@ import datetime
 import typing
 
 from src.data.DocumentMetaData import DocumentMetaData
+from src import file_utils
 
 
 class Document(BaseModel):
@@ -54,3 +55,13 @@ class Document(BaseModel):
             ),
             category_id=input_dict["categoryId"],
         )
+
+    def get_document_file_name(self) -> str:
+        return file_utils.replace_invalid_chars(
+            f"{self.name}.{self.get_file_extension()}"
+        )
+
+    def get_file_extension(self) -> str:
+        """Get document extension from mime type"""
+        ext = self.mime_type.split("/")[1]
+        return ext
