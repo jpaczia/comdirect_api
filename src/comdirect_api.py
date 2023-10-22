@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 import os
+from tqdm import tqdm
 
 from src.handler.DocumentHandler import DocumentHandler
 from src.data.Document import Document
@@ -17,7 +18,7 @@ class ComdirectAPI(BaseModel):
     def process_postbox_documents(self) -> None:
         documents = self.document_handler.get_all_postbox_contents()
 
-        for doc in documents:
+        for doc in tqdm(documents, desc="Process documents in postbox"):
             self.process_document(doc)
 
     def process_document(self, document: Document) -> None:
