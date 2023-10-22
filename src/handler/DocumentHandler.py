@@ -8,7 +8,7 @@ from src.data.Document import Document
 class DocumentHandler(AuthenticatedAbstractHandler):
     """Retrieves documents from the comdirect postbox"""
 
-    def get_postbox_content_list(self, query_params: str = "") -> typing.List[Document]:
+    def get_postbox_content_list(self, query_params: str = "") -> typing.Set[Document]:
         """Get list with documents and corresponding metadata in the PostBox.
         To download a document use the function DocumentHandler.get_document().
         Described in section 9.1.1 in the comdirect API documentation.
@@ -23,7 +23,29 @@ class DocumentHandler(AuthenticatedAbstractHandler):
         url = f"{self.api_config.api_url}/messages/clients/user/v2/documents/{query_params}"
         response_json = self.general_get_request(url=url, payload={})
 
-        return [Document.from_dict(v) for v in response_json["values"]]
+        return set([Document.from_dict(v) for v in response_json["values"]])
+
+    def get_all_postbox_contents(self) -> typing.Set[Document]:
+        """Load all available documents in postbox"""
+        result: typing.Set[Document] = set()
+
+        new_documents = True
+        iteration = 0
+        while new_documents:
+            # retrieve next 1000 documents from the postbox
+            tmp_documents = self.get_postbox_content_list(
+                query_params=f"?paging-first={iteration}&paging-count=1000"
+            )
+
+            # check if any documents are new, some documents are retrieved multiple times
+            new_documents = len([doc for doc in tmp_documents if doc not in result]) > 0
+
+            if new_documents:
+                # new documents found, i.e. check next page for new documents too
+                iteration += 1
+                result.update(tmp_documents)
+
+        return result
 
     def get_document(
         self, document_id: str, document_mime_type: str

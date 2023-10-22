@@ -93,3 +93,6 @@ class Document(BaseModel):
                 for ignored_file_class in ignored_file_classes
             ]
         )
+
+    def __hash__(self) -> int:
+        return self.document_id.__hash__()

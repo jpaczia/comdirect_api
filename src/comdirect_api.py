@@ -15,7 +15,7 @@ class ComdirectAPI(BaseModel):
     output_dir: str = Field(default_factory=file_utils.get_output_dir)
 
     def process_postbox_documents(self) -> None:
-        documents = self.document_handler.get_postbox_content_list()
+        documents = self.document_handler.get_all_postbox_contents()
 
         for doc in documents:
             self.process_document(doc)
