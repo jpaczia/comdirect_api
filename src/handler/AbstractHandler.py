@@ -1,7 +1,15 @@
 from abc import ABC
 from pydantic import BaseModel, Field
+import typing
+import time
+import uuid
 
 from src.data import config_types
+
+
+def get_session_id() -> str:
+    """Get session uuid"""
+    return str(uuid.uuid4())
 
 
 class AbstractHandler(BaseModel, ABC):
@@ -11,3 +19,10 @@ class AbstractHandler(BaseModel, ABC):
     api_config: config_types.ApiConfig = Field(
         default_factory=config_types.ApiConfig.from_config
     )
+
+    session_id: typing.Optional[str] = Field(default_factory=get_session_id)
+
+    @classmethod
+    def generate_request_id(cls) -> str:
+        """Returns a request id with 9 characters."""
+        return str(round(time.time() * 1000))[-9:]
