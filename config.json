@@ -1,0 +1,5 @@
+{
+	"api_url": "https://api.comdirect.de/api",
+	"oauth_url": "https://api.comdirect.de",
+	"credentials_path": "TODO"
+}
