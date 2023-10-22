@@ -17,6 +17,7 @@ class AuthenticationHandler(AbstractHandler):
     credentials: Credentials = Field(default_factory=Credentials.get_credentials)
     session_identifier: typing.Optional[str] = Field(default=None)
     challenge_id: typing.Optional[str] = Field(default=None)
+    expiration_datetime: typing.Optional[datetime.datetime] = Field(default=None)
 
     def authenticate(self) -> None:
         """Authenticate against the comdirect API"""
@@ -187,3 +188,6 @@ class AuthenticationHandler(AbstractHandler):
         """Set the retrieved access and refresh token"""
         self.access_token = response_json["access_token"]
         self.refresh_token = response_json["refresh_token"]
+        self.expiration_datetime = datetime.datetime.now() + datetime.timedelta(
+            seconds=int(response_json["expires_in"])
+        )
