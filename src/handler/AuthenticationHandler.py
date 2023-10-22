@@ -19,6 +19,19 @@ class AuthenticationHandler(AbstractHandler):
     challenge_id: typing.Optional[str] = Field(default=None)
     expiration_datetime: typing.Optional[datetime.datetime] = Field(default=None)
 
+    def get_access_token(self) -> str:
+        if not self.is_authenticated():
+            self.authenticate()
+
+        return self.access_token
+
+    def is_authenticated(self) -> bool:
+        valid_token = (
+            self.expiration_datetime is not None
+            and self.expiration_datetime > datetime.datetime.now()
+        )
+        return self.access_token is not None and valid_token
+
     def authenticate(self) -> None:
         """Authenticate against the comdirect API"""
         self.retrieve_oauth2_token()

@@ -3,7 +3,7 @@ from src.comdirect_api import ComdirectAPI
 
 def main() -> None:
     comdirect_api = ComdirectAPI()
-    comdirect_api.document_handler.auth_handler.authenticate()
+    comdirect_api.process_postbox_documents()
 
 
 if __name__ == "__main__":
