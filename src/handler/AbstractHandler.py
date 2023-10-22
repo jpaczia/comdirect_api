@@ -5,6 +5,7 @@ import time
 import uuid
 
 from src.data import config_types
+from src import file_utils
 
 
 def get_session_id() -> str:
@@ -19,6 +20,7 @@ class AbstractHandler(BaseModel, ABC):
     api_config: config_types.ApiConfig = Field(
         default_factory=config_types.ApiConfig.from_config
     )
+    time_format: str = file_utils.get_time_format()
 
     session_id: typing.Optional[str] = Field(default_factory=get_session_id)
 

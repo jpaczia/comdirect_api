@@ -30,3 +30,7 @@ def get_credentials_path() -> str:
             and run the script again."""
         )
     return config_json["credentials_path"]
+
+
+def get_time_format() -> str:
+    return load_config()["time_format"]
