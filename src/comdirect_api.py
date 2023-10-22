@@ -9,6 +9,8 @@ from src.data.config_types import DocumentClassificationConfig
 
 
 class ComdirectAPI(BaseModel):
+    """Takes care of all the interaction with the Comdirect handlers."""
+
     document_classification_config: DocumentClassificationConfig = Field(
         default_factory=DocumentClassificationConfig.from_config
     )
@@ -16,6 +18,7 @@ class ComdirectAPI(BaseModel):
     output_dir: str = Field(default_factory=file_utils.get_output_dir)
 
     def process_postbox_documents(self) -> None:
+        """Process all documents in the postbox"""
         documents = self.document_handler.get_all_postbox_contents()
 
         for doc in tqdm(documents, desc="Process documents in postbox"):
@@ -51,3 +54,4 @@ class ComdirectAPI(BaseModel):
             document_id=document.document_id, document_mime_type=document.mime_type
         )
         file_utils.save_pdf(content=document_content, pdf_path=doc_path)
+        print(f"Saved document: {doc_path}")
